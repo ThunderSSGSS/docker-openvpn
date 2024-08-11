@@ -39,7 +39,7 @@ else
     export DNS="8.8.8.8"
 fi
 
-# END VARS
+# END
 
 export EASYRSA_REQ_CN=$1
 mkdir -p $OPENVPN/clients_conf
