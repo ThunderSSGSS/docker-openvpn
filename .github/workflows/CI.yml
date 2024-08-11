@@ -1,0 +1,33 @@
+# This workflow will test, create docker images and push to dockerhub
+name: CI
+
+on:
+  push:
+    branches: ["master"]
+    paths: ["src/**"]
+  pull_request:
+    branches: ["master"]
+    types: [closed]
+    paths: ["src/**"]
+
+env:
+  RELEASE_VERSION: v2.6.3
+  DOCKER_REPO: thunderssgss/openvpn
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
+    environment: 
+      name: deploy_docker_hub
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build image
+        run: |
+          cd src/auth-server && docker build . -t ${{ env.DOCKER_REPO }}:${{ env.RELEASE_VERSION }}
+
+      - name: Push images to docker hub
+        run: |
+          docker login -u ${{ secrets.DOCKER_HUB_USER }} -p ${{ secrets.DOCKER_HUB_PASS }}
+          docker push ${{ env.DOCKER_REPO }}:${{ env.RELEASE_VERSION }}

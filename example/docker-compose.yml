@@ -1,0 +1,51 @@
+version: '3.6'
+
+networks:
+  openvpn_net:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.78.0.0/16
+        gateway: 10.78.0.1
+
+services:
+
+  bind9:
+    image: internetsystemsconsortium/bind9:9.18
+    networks:
+      openvpn_net:
+        ipv4_address: 10.78.0.2
+    dns:
+    - 127.0.0.1
+    environment:
+      TZ: Africa/Harare
+    volumes:
+    - ./named.conf:/etc/bind/named.conf:ro
+    extra_hosts:
+    - "openvpn-server:10.78.0.6"
+    - "bind9:10.78.0.2"
+
+
+  openvpn-server:
+    image: thunderssgss/openvpn:v2.6.3
+    dns:
+    - 10.78.0.2
+    networks:
+      openvpn_net:
+        ipv4_address: 10.78.0.6
+    environment:
+      OPENVPN_SERVER_CN: openvpn-server
+      OPENVPN_SERVER_INTERNAL_NETWORK: "10.8.0.0 255.255.255.0"
+      OPENVPN_SERVER_CLIENT_ROUTES: |
+        route 10.5.0.0 255.255.0.0
+        route 10.78.0.0 255.255.0.0
+      OPENVPN_SERVER_CLIENT_DNS_DOMAIN: bind9
+    volumes:
+    - ./openvpn:/etc/openvpn
+    devices:
+    - /dev/net/tun
+    cap_add:
+    - NET_ADMIN
+    ports:
+    - 8443:8443
+    
