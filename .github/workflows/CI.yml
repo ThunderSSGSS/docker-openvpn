@@ -25,7 +25,7 @@ jobs:
 
       - name: Build image
         run: |
-          cd src/auth-server && docker build . -t ${{ env.DOCKER_REPO }}:${{ env.RELEASE_VERSION }}
+          cd src && docker build . -t ${{ env.DOCKER_REPO }}:${{ env.RELEASE_VERSION }}
 
       - name: Push images to docker hub
         run: |
